@@ -16,6 +16,7 @@ module Leadtune
       @config = config
       @post_data = nil
       @response = {}
+      @url = Leadtune::Config::RESOURCE
     end
 
     def get(post_data)
@@ -95,8 +96,16 @@ module Leadtune
       end
     end
 
+    def build_optional_query_params
+      if @config.query_params
+        "?" + Leadtune::Util.to_params(@config.query_params)
+      else
+        ""
+      end
+    end
+
     def build_post_url #:nodoc:
-      URI.join(@config.leadtune_host, "/prospects").to_s
+      URI.join(@config.leadtune_host, @url, build_optional_query_params).to_s
     end
 
     def build_get_url #:nodoc:
@@ -110,7 +119,7 @@ module Leadtune
     end
 
     def build_put_url #:nodoc:
-      path = "/prospects"
+      path = @url 
       path += "/#{@post_data["prospect_id"]}" if @post_data["prospect_id"]
       # I would use URI.join, but there's a bug in its implementation in 1.8.6
       @config.leadtune_host + path
